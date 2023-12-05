@@ -1,8 +1,8 @@
 {
-    "window.zoomLevel": 1,
+    "window.zoomLevel": 2,
     "[go]": {
         "editor.codeActionsOnSave": {
             "source.organizeImports": false
-        },
+        }
     }
 }

@@ -12,7 +12,7 @@ func DecodeRequestBody(r *http.Request, x interface{}) error {
 	if err != nil {
 		return err
 	}
-	err = json.Unmarshal([]byte(body), x)
+	err = json.Unmarshal([]byte(body), &x)
 	if err != nil {
 		return err
 	}	

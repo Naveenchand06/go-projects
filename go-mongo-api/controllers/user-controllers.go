@@ -9,7 +9,6 @@ import (
 	"github.com/Naveenchand06/go-projects/go-mongo-api/config"
 	"github.com/Naveenchand06/go-projects/go-mongo-api/constants"
 	"github.com/Naveenchand06/go-projects/go-mongo-api/models"
-	"github.com/Naveenchand06/go-projects/go-mongo-api/utils"
 	"github.com/gorilla/mux"
 )
 
@@ -31,7 +30,8 @@ func sendError(w http.ResponseWriter, statusCode int, err string) {
 func CreateUserController(w http.ResponseWriter, req *http.Request) {
 	var reqUser models.User
 	// err := json.NewDecoder(req.Body).Decode(&reqUser)
-	err := utils.DecodeRequestBody(req, &reqUser)
+	// err := utils.DecodeRequestBody(req, &reqUser)
+	err := json.NewDecoder(req.Body).Decode(&reqUser)
 	if err != nil {
 		fmt.Println("The error is ->", err)
 		sendError(w, http.StatusBadRequest, "invalid request payload")
@@ -80,10 +80,34 @@ func GetUserByIDController(w http.ResponseWriter, req *http.Request) {
 	sendResponse(w, http.StatusFound, user)
 }
 
-func UpdateUserController(w http.ResponseWriter, req *http.Request) {
+func UpdateUserByIdController(w http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	id := vars["id"]
+	var user models.User
+	// err := utils.DecodeRequestBody(req, user)
+	err := json.NewDecoder(req.Body).Decode(&user)
+	if err != nil {
+		sendError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	u, err := user.UpdateUserById(config.GetDB(), id)
+	if err != nil {
+		fmt.Println("The errro ris --> ", err)
+		sendError(w, http.StatusNotFound, err.Error())
+		return
+	}
+	sendResponse(w, http.StatusOK, u)
 
 }
 
-func DeleteUserController(w http.ResponseWriter, request *http.Request) {
-
+func DeleteUserByIdController(w http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	id := vars["id"]
+	_, err := models.DeleteUserByID(config.GetDB(), id)
+	if err != nil {
+		sendError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	msg := map[string]interface{}{"message": fmt.Sprintf("user %s deleted successfully", id)}
+	sendResponse(w, http.StatusOK, msg)
 }

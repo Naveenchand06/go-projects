@@ -16,5 +16,5 @@ func main() {
 	routes.RegisterUserRoutes(router)
 
 	http.Handle("/", router)
-	log.Fatal(http.ListenAndServe(":5020", router))
+	log.Fatal(http.ListenAndServe(":5044", router))
 }

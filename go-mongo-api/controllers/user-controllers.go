@@ -9,6 +9,8 @@ import (
 	"github.com/Naveenchand06/go-projects/go-mongo-api/config"
 	"github.com/Naveenchand06/go-projects/go-mongo-api/constants"
 	"github.com/Naveenchand06/go-projects/go-mongo-api/models"
+	"github.com/Naveenchand06/go-projects/go-mongo-api/utils"
+	"github.com/gorilla/mux"
 )
 
 func sendResponse(w http.ResponseWriter, statusCode int, payload interface{}) {
@@ -25,9 +27,11 @@ func sendError(w http.ResponseWriter, statusCode int, err string) {
 
 // *************** Controller Functions *********************
 
+// ***** Create User *****
 func CreateUserController(w http.ResponseWriter, req *http.Request) {
 	var reqUser models.User
-	err := json.NewDecoder(req.Body).Decode(&reqUser)
+	// err := json.NewDecoder(req.Body).Decode(&reqUser)
+	err := utils.DecodeRequestBody(req, &reqUser)
 	if err != nil {
 		fmt.Println("The error is ->", err)
 		sendError(w, http.StatusBadRequest, "invalid request payload")
@@ -42,7 +46,8 @@ func CreateUserController(w http.ResponseWriter, req *http.Request) {
 	sendResponse(w, http.StatusOK, reqUser)
 }
 
-func GetAllUserController(w http.ResponseWriter, request *http.Request) {
+// ***** Get All User *****
+func GetAllUserController(w http.ResponseWriter, req *http.Request) {
 	usersCollection := config.GetDB().Database(constants.DBName).Collection(constants.UserCollection)
 	cursor, err := usersCollection.Find(context.TODO(), map[string]interface{}{})
 	if err != nil {
@@ -64,14 +69,21 @@ func GetAllUserController(w http.ResponseWriter, request *http.Request) {
 	sendResponse(w, http.StatusOK, users)
 }
 
-func GetUserByIDController(writer http.ResponseWriter, request *http.Request) {
+func GetUserByIDController(w http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	id := vars["id"]
+	user, err := models.GetUserById(config.GetDB() ,id)
+	if err != nil {
+		sendError(w, http.StatusNotFound, err.Error())
+		return
+	}
+	sendResponse(w, http.StatusFound, user)
+}
+
+func UpdateUserController(w http.ResponseWriter, req *http.Request) {
 
 }
 
-func UpdateUserController(writer http.ResponseWriter, request *http.Request) {
-
-}
-
-func DeleteUserController(writer http.ResponseWriter, request *http.Request) {
+func DeleteUserController(w http.ResponseWriter, request *http.Request) {
 
 }
